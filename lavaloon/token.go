@@ -1,11 +1,14 @@
 package lavaloon
 
+type tokenType uint8
+
 type Position struct {
 	line   int
 	column int
 }
 
 type Token struct {
-	Str string
-	Pos Position
+	Type tokenType
+	Val  string
+	Pos  Position
 }
