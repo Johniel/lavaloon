@@ -1,14 +1,20 @@
 package lavaloon
 
-type tokenType uint8
+import (
+	"go/token"
+)
 
-type Position struct {
-	line   int
-	column int
-}
+const (
+	WHITESPACE token.Token = iota
+	OPEN
+	CLOSE
+	SYMBOL
+
+	DO
+)
 
 type Token struct {
-	Type tokenType
-	Val  string
-	Pos  Position
+	Type     token.Token
+	Val      string
+	Position token.Position
 }
