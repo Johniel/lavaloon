@@ -4,4 +4,4 @@ build:
 
 .PHONY: test
 test:
-	:
+	go test ./lavaloon
