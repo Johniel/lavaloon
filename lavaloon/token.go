@@ -14,7 +14,7 @@ const (
 )
 
 type Token struct {
-	Type     token.Token
-	Val      string
-	Position token.Position
+	Type token.Token
+	Val  string
+	Pos  token.Position
 }

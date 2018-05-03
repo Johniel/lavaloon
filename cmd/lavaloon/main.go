@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/token"
 	"io/ioutil"
 	"os"
 
@@ -13,6 +14,9 @@ func compile(filepath string) error {
 	if err != nil {
 		return err
 	}
+
+	fileset := token.NewFileSet()
+	fileset.AddFile(filepath, -1, len(bytes))
 
 	tokens, err := lavaloon.Lex(string(bytes))
 	if err != nil {
