@@ -2,26 +2,46 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 
 	"github.com/johniel/lavaloon/lavaloon"
 )
 
-func show(program string) {
-	ts, err := lavaloon.Lex(program)
+func compile(filepath string) error {
+	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	root, err := lavaloon.Parse(ts)
+	tokens, err := lavaloon.Lex(string(bytes))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
+	root, err := lavaloon.Parse(tokens)
+	if err != nil {
+		return err
+	}
 	fmt.Printf("%v\n", root)
+	return nil
 }
 
 func main() {
-	show("(defun add (a b) (+ a b))")
-	show("(defun fact (n) (if (= n 0) 1 (* n (fact (- n 1)))))")
+	if len(os.Args) != 2 {
+		panic("usage: lavaloon FILEPATH")
+	}
+
+	filepath := os.Args[1]
+
+	if _, err := os.Stat(filepath); err != nil {
+		panic("no such file: " + filepath)
+	}
+
+	err := compile(filepath)
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }
