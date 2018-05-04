@@ -61,6 +61,18 @@ func (n *LavaloonNode) String() string {
 	return s
 }
 
+func (n *LavaloonNode) IsEmpty() bool {
+	return n.Token == nil && len(n.Child) == 0
+}
+
+func (n *LavaloonNode) IsInternal() bool {
+	return !n.IsSymbol()
+}
+
+func (n *LavaloonNode) IsLeaf() bool {
+	return n.IsSymbol()
+}
+
 func (n *LavaloonNode) IsSymbol() bool {
 	return n.Token != nil
 }
@@ -151,11 +163,10 @@ func (n *LavaloonNode) Gen() (*ast.File, error) {
 	decls := make([]ast.Decl, 0)
 
 	for _, m := range n.Child {
-		// top level statements are only containing import and decl.
-		if len(m.Child) <= 1 {
+		if !m.IsInternal() {
 			return nil, fmt.Errorf("invalid top level expr")
 		}
-		if m.Child[0].Token == nil {
+		if !m.Child[0].IsSymbol() {
 			return nil, fmt.Errorf("invalid top level function")
 		}
 		if _, ok := TOP_LEVEL[m.Child[0].Token.Val]; !ok {
