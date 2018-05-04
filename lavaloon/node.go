@@ -141,6 +141,13 @@ func (n *LavaloonNode) genDefun() (*ast.FuncDecl, error) {
 }
 
 func (n *LavaloonNode) Gen() (*ast.File, error) {
+	TOP_LEVEL := map[string]bool{
+		"defun":   true,
+		"import":  true,
+		"package": true,
+		"const":   true,
+	}
+
 	decls := make([]ast.Decl, 0)
 
 	for _, m := range n.Child {
@@ -151,8 +158,8 @@ func (n *LavaloonNode) Gen() (*ast.File, error) {
 		if m.Child[0].Token == nil {
 			return nil, fmt.Errorf("invalid top level function")
 		}
-		if !(m.Child[0].Token.Val == "defun" || m.Child[0].Token.Val == "import") {
-			return nil, fmt.Errorf("top level statements are only containing import or defun.")
+		if _, ok := TOP_LEVEL[m.Child[0].Token.Val]; !ok {
+			return nil, fmt.Errorf("%s is not acceptable in top level stmt.", m.Child[0].Token.Val)
 		}
 
 		switch m.Child[0].Token.Val {

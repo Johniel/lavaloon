@@ -10,6 +10,7 @@ const (
 	CLOSE
 	SYMBOL
 
+	DEFUN
 	DO
 )
 
