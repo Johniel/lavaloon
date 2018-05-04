@@ -1,9 +1,10 @@
 package lavaloon
 
 import (
-	"fmt"
+	"go/format"
 	"go/token"
 	"io/ioutil"
+	"os"
 )
 
 func Transpile(filepath string) error {
@@ -24,6 +25,12 @@ func Transpile(filepath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v\n", root)
+
+	generated, err := root.Gen()
+	if err != nil {
+		return err
+	}
+
+	format.Node(os.Stdout, token.NewFileSet(), generated)
 	return nil
 }

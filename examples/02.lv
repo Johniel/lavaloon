@@ -1,0 +1,4 @@
+(import "fmt")
+
+(defun main ()
+  (fmt.Println "hello world"))
