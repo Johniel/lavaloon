@@ -1,7 +1,7 @@
 (import "fmt")
 
-(defun add(a b)
-  (+ a b))
+(defun say-hello()
+  (fmt.Println "hello-world"))
 
 (defun main()
-  (fmt.Printf "%d\n" (add 1 2)))
+  (say-hello))
