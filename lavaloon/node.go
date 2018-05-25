@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"strconv"
+	"strings"
 )
 
 type LavaloonNode struct {
@@ -89,6 +90,10 @@ func New() *LavaloonNode {
 	return n
 }
 
+func functionNameQuote(s string) string {
+	return strings.Replace(s, "-", "_", -1)
+}
+
 func (n *LavaloonNode) genImport() (*ast.GenDecl, error) {
 	if len(n.Child) != 2 {
 		return nil, fmt.Errorf("invalid number of arguments(%d): import", len(n.Child))
@@ -111,41 +116,79 @@ func (n *LavaloonNode) genImport() (*ast.GenDecl, error) {
 }
 
 func (n *LavaloonNode) genBlockStmt() (*ast.BlockStmt, error) {
-	return &ast.BlockStmt{
-		List: []ast.Stmt{
-			&ast.ExprStmt{
-				X: &ast.CallExpr{
-					Fun: &ast.SelectorExpr{
-						X:   ast.NewIdent("fmt"),
-						Sel: ast.NewIdent("Println"),
-					},
-					Args: []ast.Expr{
-						&ast.BasicLit{
-							Kind:  token.STRING,
-							Value: strconv.Quote("hello world"),
+	// 関数呼び出しかスペシャルフォームを考える
+	// if, let, progn(do)だけで良いかな
+	if !n.IsInternal() {
+		return nil, fmt.Errorf("invalid stmt")
+	}
+
+	if !n.Child[0].IsSymbol() {
+		panic("under-constraction")
+	}
+
+	if n.Child[0].Token.Val == "." {
+		x := ast.NewIdent(n.Child[1].Token.Val)
+		sel := ast.NewIdent(functionNameQuote(n.Child[2].Token.Val))
+
+		return &ast.BlockStmt{
+			List: []ast.Stmt{
+				&ast.ExprStmt{
+					X: &ast.CallExpr{
+						Fun: &ast.SelectorExpr{
+							X:   x,
+							Sel: sel,
+						},
+						Args: []ast.Expr{
+							&ast.BasicLit{
+								Kind:  token.STRING,
+								Value: strconv.Quote("hello world"),
+							},
 						},
 					},
 				},
 			},
-		},
-	}, nil
+		}, nil
+	}
+
+	if n.Child[0].IsSymbol() {
+		sel := ast.NewIdent(functionNameQuote(n.Child[0].Token.Val))
+		return &ast.BlockStmt{
+			List: []ast.Stmt{
+				&ast.ExprStmt{
+					X: &ast.CallExpr{
+						Fun: sel,
+						Args: []ast.Expr{
+							&ast.BasicLit{
+								Kind:  token.STRING,
+								Value: strconv.Quote("hello world"),
+							},
+						},
+					},
+				},
+			},
+		}, nil
+	}
+
+	panic("")
 }
 
 func (n *LavaloonNode) genDefun() (*ast.FuncDecl, error) {
-	if len(n.Child) != 4 {
+	if len(n.Child) < 4 {
 		return nil, fmt.Errorf("invalid number of arguments(%d): defun", len(n.Child))
 	}
 	if n.Child[0].Token == nil || n.Child[0].Token.Val != "defun" {
 		panic("")
 	}
 
-	block, err := n.Child[3].genBlockStmt()
+	block, err := n.Child[len(n.Child)-1].genBlockStmt()
 	if err != nil {
 		return nil, err
 	}
 
+	// lispでsnake_caseするやつはいないはずなので大丈夫！
+	fnName := functionNameQuote(n.Child[1].Token.Val)
 	return &ast.FuncDecl{
-			Name: ast.NewIdent(n.Child[1].Token.Val),
+			Name: ast.NewIdent(fnName),
 			Type: &ast.FuncType{},
 			Body: block,
 		},

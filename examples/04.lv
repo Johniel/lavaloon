@@ -4,11 +4,5 @@
   (@ int int int)
   (+ a b))
 
-(defun -map-int(fn hystack)
-  (@ (@ int int) []int int)
-  (if (= 1 (len hystack))
-      (car hystack)
-    (fn (car hystack) (-map-int (cdr hystack)))))
-
 (defun main()
-  (fmt.Printf "%d\n" (-map 'add (list 1 2 3 4))))
+  (. Printf fmt "%d\n" (add 1 2)))

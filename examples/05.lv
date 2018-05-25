@@ -1,0 +1,14 @@
+(import "fmt")
+
+(defun add(a b)
+  (@ int int int)
+  (+ a b))
+
+(defun -map-int(fn hystack)
+  (@ (@ int int) []int int)
+  (if (= 1 (len hystack))
+      (car hystack)
+    (fn (car hystack) (-map-int (cdr hystack)))))
+
+(defun main()
+  (. Printf fmt "%d\n" (-map 'add (list 1 2 3 4))))
